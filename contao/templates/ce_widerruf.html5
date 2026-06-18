@@ -35,7 +35,7 @@ $altchaEnabled = (bool) ($this->altcha_enabled ?? true);
     data-error-submit="<?= htmlspecialchars((string) ($texts['submit_error'] ?? 'Widerruf konnte nicht uebermittelt werden.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
     data-success-fallback="<?= htmlspecialchars((string) ($texts['submit_success'] ?? 'Widerruf erfolgreich uebermittelt.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
 >
-    <script defer src="/bundles/kirstenroschanskicontaowiderrufbundle/widerruf.js"></script>
+    <script defer src="/bundles/kirstenroschanskicontaowiderruf/widerruf.js"></script>
 
     <?php if ($altchaEnabled): ?>
         <script async defer src="/bundles/markocupiccontaoaltchaantispam/altcha/dist/altcha.js" type="module"></script>
