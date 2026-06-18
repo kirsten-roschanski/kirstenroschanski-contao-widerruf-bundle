@@ -39,6 +39,8 @@ class RevocationApiController
                 throw new \InvalidArgumentException('Anti-Spam-Prüfung fehlgeschlagen. Bitte erneut versuchen.');
             }
 
+            $payload['notification_id'] = $this->getFormSubmitNotificationIdForCte($cteId);
+
             unset($payload['altcha'], $payload['cte_id']);
 
             $result = $this->revocationService->submitRevocation((array) $payload);
@@ -70,6 +72,24 @@ class RevocationApiController
             return '1' === (string) $value;
         } catch (\Throwable) {
             return true;
+        }
+    }
+
+    private function getFormSubmitNotificationIdForCte(int $cteId): int
+    {
+        if ($cteId <= 0) {
+            return 0;
+        }
+
+        try {
+            $value = $this->connection->fetchOne(
+                'SELECT widerruf_notification_form_submit FROM tl_content WHERE id = :id LIMIT 1',
+                ['id' => $cteId]
+            );
+
+            return max(0, (int) $value);
+        } catch (\Throwable) {
+            return 0;
         }
     }
 }

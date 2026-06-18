@@ -26,6 +26,7 @@ class RevocationService
         $scopeType = 'full';
         $scopeDetails = '';
         $orderUuid = trim((string) ($payload['order_uuid'] ?? ''));
+        $notificationId = max(0, (int) ($payload['notification_id'] ?? 0));
         $selectedItems = [];
 
         if ('' === $consumerName || '' === $contractReference || '' === $confirmationEmail) {
@@ -64,7 +65,9 @@ class RevocationService
             $scopeType,
             $scopeDetails,
             $selectedItems,
-            $revocationId
+            $revocationId,
+            $notificationId,
+            $orderUuid,
         );
 
         return [
@@ -79,13 +82,15 @@ class RevocationService
         string $scopeType,
         string $scopeDetails,
         array $selectedItems,
-        int $revocationId
+        int $revocationId,
+        int $notificationId,
+        string $orderUuid,
     ): void {
         if ('' === trim($to)) {
             return;
         }
 
-        if ($this->sendConfirmationViaNotificationCenter($to, $name, $contractReference, $scopeType, $scopeDetails, $selectedItems, $revocationId)) {
+        if ($this->sendConfirmationViaNotificationCenter($to, $name, $contractReference, $scopeType, $scopeDetails, $selectedItems, $revocationId, $notificationId, $orderUuid)) {
             return;
         }
 
@@ -128,7 +133,9 @@ class RevocationService
         string $scopeType,
         string $scopeDetails,
         array $selectedItems,
-        int $revocationId
+        int $revocationId,
+        int $notificationId,
+        string $orderUuid,
     ): bool {
         $notificationCenterClass = 'Terminal42\\NotificationCenterBundle\\NotificationCenter';
 
@@ -136,10 +143,12 @@ class RevocationService
             return false;
         }
 
-        $notificationId = (int) $this->connection->fetchOne(
-            'SELECT id FROM tl_nc_notification WHERE type = :type ORDER BY id ASC LIMIT 1',
-            ['type' => 'widerruf_form_submit']
-        );
+        if ($notificationId <= 0) {
+            $notificationId = (int) $this->connection->fetchOne(
+                'SELECT id FROM tl_nc_notification WHERE type = :type ORDER BY id ASC LIMIT 1',
+                ['type' => 'widerruf_form_submit']
+            );
+        }
 
         if ($notificationId <= 0) {
             return false;
@@ -163,7 +172,7 @@ class RevocationService
                 'consumer_name' => $name,
                 'confirmation_email' => $to,
                 'contract_reference' => $contractReference,
-                'order_uuid' => '',
+                'order_uuid' => $orderUuid,
                 'created_at' => date('d.m.Y H:i', time()),
             ]);
 
