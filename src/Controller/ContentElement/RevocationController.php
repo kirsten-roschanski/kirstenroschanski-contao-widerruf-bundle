@@ -55,15 +55,7 @@ class RevocationController extends AbstractContentElementController
             ? $configuredSuccessMessage
             : (string) ($texts['success_default'] ?? ''));
 
-        if (\is_object($template) && method_exists($template, 'getResponse')) {
-            return $template->getResponse();
-        }
-
-        if (\is_object($template) && method_exists($template, 'parse')) {
-            return new Response((string) $template->parse());
-        }
-
-        return new Response('');
+        return parent::getResponse($template, $model, $request);
     }
 
     private function setTemplateValue(object $template, string $key, mixed $value): void

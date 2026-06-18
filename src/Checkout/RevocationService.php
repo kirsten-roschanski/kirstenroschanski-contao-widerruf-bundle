@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kirstenroschanski\ContaoWiderrufBundle\Checkout;
 
 use Contao\Config;
+use Contao\System;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -80,6 +81,14 @@ class RevocationService
         array $selectedItems,
         int $revocationId
     ): void {
+        if ('' === trim($to)) {
+            return;
+        }
+
+        if ($this->sendConfirmationViaNotificationCenter($to, $name, $contractReference, $scopeType, $scopeDetails, $selectedItems, $revocationId)) {
+            return;
+        }
+
         $from = (string) (Config::get('adminEmail') ?: 'noreply@localhost');
         $scopeLabel = 'full' === $scopeType ? 'gesamte Bestellung' : 'Teilwiderruf';
         $itemsText = [] === $selectedItems ? '-' : implode("\n", $selectedItems);
@@ -110,5 +119,57 @@ class RevocationService
             ->text($body);
 
         $this->mailer->send($email);
+    }
+
+    private function sendConfirmationViaNotificationCenter(
+        string $to,
+        string $name,
+        string $contractReference,
+        string $scopeType,
+        string $scopeDetails,
+        array $selectedItems,
+        int $revocationId
+    ): bool {
+        $notificationCenterClass = 'Terminal42\\NotificationCenterBundle\\NotificationCenter';
+
+        if (!class_exists($notificationCenterClass)) {
+            return false;
+        }
+
+        $notificationId = (int) $this->connection->fetchOne(
+            'SELECT id FROM tl_nc_notification WHERE type = :type ORDER BY id ASC LIMIT 1',
+            ['type' => 'widerruf_form_submit']
+        );
+
+        if ($notificationId <= 0) {
+            return false;
+        }
+
+        try {
+            $container = System::getContainer();
+
+            if (!$container->has($notificationCenterClass)) {
+                return false;
+            }
+
+            $notificationCenter = $container->get($notificationCenterClass);
+
+            if (!method_exists($notificationCenter, 'sendNotification')) {
+                return false;
+            }
+
+            $notificationCenter->sendNotification($notificationId, [
+                'revocation_id' => (string) $revocationId,
+                'consumer_name' => $name,
+                'confirmation_email' => $to,
+                'contract_reference' => $contractReference,
+                'order_uuid' => '',
+                'created_at' => date('d.m.Y H:i', time()),
+            ]);
+
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }
