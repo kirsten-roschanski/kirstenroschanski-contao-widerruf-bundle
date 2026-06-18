@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 return static function (RoutingConfigurator $routes): void {
     $routes
         ->add('widerruf_submit', '/_widerruf')
-        ->controller([RevocationApiController::class, '__invoke'])
+        ->controller(RevocationApiController::class)
         ->methods(['POST'])
     ;
 };

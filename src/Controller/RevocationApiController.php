@@ -7,11 +7,12 @@ namespace Kirstenroschanski\ContaoWiderrufBundle\Controller;
 use Doctrine\DBAL\Connection;
 use Kirstenroschanski\ContaoWiderrufBundle\Checkout\RevocationService;
 use Markocupic\ContaoAltchaAntispam\Altcha\AltchaValidator;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class RevocationApiController
+class RevocationApiController extends AbstractController
 {
     public function __construct(
         private readonly RevocationService $revocationService,
