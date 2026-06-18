@@ -12,15 +12,12 @@ use Markocupic\ContaoAltchaAntispam\Controller\AltchaController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Twig\Environment;
 
 #[AsContentElement('widerruf', category: 'includes')]
 class RevocationController extends AbstractContentElementController
 {
-    public function __construct(
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly Environment $twig,
-    ) {
+    public function __construct(private readonly UrlGeneratorInterface $urlGenerator)
+    {
     }
 
     protected function getResponse($template, ContentModel $model, Request $request): Response
