@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-$GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf_form_submit'] = 'Revocation: Form submission';
-$GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf_status_change'] = 'Revocation: Status change';
+$GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf_form_submit'] = 'Form submission';
+$GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf_status_change'] = 'Status change';
 $GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf'] = 'Revocation';
 
 $GLOBALS['TL_LANG']['nc_token']['revocation_id'] = 'Revocation process id';

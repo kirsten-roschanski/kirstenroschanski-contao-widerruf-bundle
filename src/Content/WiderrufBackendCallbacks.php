@@ -8,6 +8,7 @@ use Contao\Config;
 use Contao\DataContainer;
 use Contao\Input;
 use Contao\StringUtil;
+use Contao\System;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
@@ -54,7 +55,9 @@ class WiderrufBackendCallbacks
             (string) ($record['consumer_name'] ?? ''),
             (string) ($record['contract_reference'] ?? ''),
             (string) ($record['order_uuid'] ?? ''),
-            $status
+            $status,
+            $recordId,
+            $now
         );
 
         return $status;
@@ -154,9 +157,13 @@ class WiderrufBackendCallbacks
         return $this->connection->fetchAllAssociative('SELECT id, status, consumer_name, confirmation_email, contract_reference, order_uuid, created_at, status_changed_at FROM tl_widerruf ORDER BY created_at DESC, id DESC');
     }
 
-    private function sendStatusMail(string $to, string $name, string $contractReference, string $orderUuid, string $status): void
+    private function sendStatusMail(string $to, string $name, string $contractReference, string $orderUuid, string $status, int $recordId, int $statusChangedAt): void
     {
         if ('' === trim($to)) {
+            return;
+        }
+
+        if ($this->sendStatusNotificationViaNotificationCenter($recordId, $to, $name, $contractReference, $orderUuid, $status, $statusChangedAt)) {
             return;
         }
 
@@ -181,6 +188,64 @@ class WiderrufBackendCallbacks
             ->text($body);
 
         $this->mailer->send($email);
+    }
+
+    private function sendStatusNotificationViaNotificationCenter(
+        int $recordId,
+        string $to,
+        string $name,
+        string $contractReference,
+        string $orderUuid,
+        string $status,
+        int $statusChangedAt
+    ): bool {
+        $notificationCenterClass = 'Terminal42\\NotificationCenterBundle\\NotificationCenter';
+
+        if (!class_exists($notificationCenterClass)) {
+            return false;
+        }
+
+        $notificationId = (int) Config::get('widerruf_notification_status_change');
+
+        if ($notificationId <= 0) {
+            $notificationId = (int) $this->connection->fetchOne(
+                'SELECT id FROM tl_nc_notification WHERE type = :type ORDER BY id ASC LIMIT 1',
+                ['type' => 'widerruf_status_change']
+            );
+        }
+
+        if ($notificationId <= 0) {
+            return false;
+        }
+
+        try {
+            $container = System::getContainer();
+
+            if (!$container->has($notificationCenterClass)) {
+                return false;
+            }
+
+            $notificationCenter = $container->get($notificationCenterClass);
+
+            if (!method_exists($notificationCenter, 'sendNotification')) {
+                return false;
+            }
+
+            $notificationCenter->sendNotification($notificationId, [
+                'revocation_id' => (string) $recordId,
+                'status' => $status,
+                'status_label' => $this->getStatusLabel($status),
+                'consumer_name' => $name,
+                'confirmation_email' => $to,
+                'contract_reference' => $contractReference,
+                'order_uuid' => $orderUuid,
+                'status_changed_at' => date('d.m.Y H:i', $statusChangedAt),
+            ]);
+
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function getStatusLabel(string $status): string
