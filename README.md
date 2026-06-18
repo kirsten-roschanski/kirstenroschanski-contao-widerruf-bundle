@@ -41,7 +41,7 @@ Eingegangen am: ##created_at##
 Wir prüfen deinen Vorgang und informieren dich über den weiteren Verlauf.
 
 Viele Grüße
-Market Gardening Marburg
+Dein Widerrufs-Team
 ```
 
 ## Vorlage 2: Status-Update (DE)
