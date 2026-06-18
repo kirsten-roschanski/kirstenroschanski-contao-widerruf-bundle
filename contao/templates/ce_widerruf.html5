@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+$headlineText = '';
+$headlineTag = 'h2';
+
+if (is_array($this->headline ?? null)) {
+    $headlineText = (string) ($this->headline['text'] ?? '');
+    $headlineTag = (string) ($this->headline['tag_name'] ?? 'h2');
+} else {
+    $headlineText = (string) ($this->headline ?? '');
+}
+
+$allowedHeadlineTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+if (!in_array($headlineTag, $allowedHeadlineTags, true)) {
+    $headlineTag = 'h2';
+}
+
+$texts = is_array($this->widerruf_texts ?? null) ? $this->widerruf_texts : [];
+$submitUrl = (string) ($this->submit_url ?? '/_widerruf');
+$altchaChallengeUrl = (string) ($this->altcha_challenge_url ?? '/_contao_altcha_challenge');
+$successMessage = (string) ($this->success_message ?? '');
+$prefillUuid = (string) ($this->prefill_uuid ?? '');
+?>
+<section
+    class="checkout-wrap section"
+    data-widerruf
+    data-widerruf-url="<?= htmlspecialchars($submitUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+    data-success-message="<?= htmlspecialchars($successMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+    data-error-missing-altcha="<?= htmlspecialchars((string) ($texts['altcha_missing'] ?? 'Bitte Anti-Spam-Pruefung abschliessen.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+    data-error-submit="<?= htmlspecialchars((string) ($texts['submit_error'] ?? 'Widerruf konnte nicht uebermittelt werden.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+    data-success-fallback="<?= htmlspecialchars((string) ($texts['submit_success'] ?? 'Widerruf erfolgreich uebermittelt.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+>
+    <script async defer src="/bundles/markocupiccontaoaltchaantispam/altcha/dist/altcha.js" type="module"></script>
+
+    <article class="card">
+        <?php if ('' !== trim($headlineText)): ?>
+            <<?= $headlineTag ?>><?= htmlspecialchars($headlineText, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></<?= $headlineTag ?>>
+        <?php else: ?>
+            <h2><?= htmlspecialchars((string) ($texts['headline_default'] ?? 'Widerrufsformular'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h2>
+        <?php endif; ?>
+
+        <form data-widerruf-form>
+            <input type="hidden" name="order_uuid" value="<?= htmlspecialchars($prefillUuid, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
+
+            <p>
+                <label for="rv-name"><?= htmlspecialchars((string) ($texts['consumer_name'] ?? 'Name des Verbrauchers'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></label>
+                <input id="rv-name" name="consumer_name" required>
+            </p>
+
+            <p>
+                <label for="rv-contract"><?= htmlspecialchars((string) ($texts['contract_reference'] ?? 'Vertragsangaben'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></label>
+                <input id="rv-contract" name="contract_reference" required>
+            </p>
+
+            <p>
+                <label for="rv-email"><?= htmlspecialchars((string) ($texts['confirmation_email'] ?? 'E-Mail-Adresse fuer die Bestaetigung'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></label>
+                <input id="rv-email" name="confirmation_email" type="email" required>
+            </p>
+
+            <p>
+                <altcha-widget
+                    name="altcha"
+                    challengeurl="<?= htmlspecialchars($altchaChallengeUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+                    auto="onsubmit"
+                    hidefooter
+                ></altcha-widget>
+            </p>
+
+            <p><button class="btn" type="submit"><?= htmlspecialchars((string) ($texts['submit'] ?? 'Widerruf absenden'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></button></p>
+            <p class="inline-note" data-widerruf-message></p>
+        </form>
+    </article>
+</section>
