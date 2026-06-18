@@ -1,0 +1,60 @@
+{% set headline_text = '' %}
+{% set headline_tag = 'h2' %}
+
+{% if headline is iterable %}
+  {% set headline_text = headline.text|default('') %}
+  {% set headline_tag = headline.tag_name|default('h2') %}
+{% else %}
+  {% set headline_text = headline %}
+{% endif %}
+
+<section
+  class="checkout-wrap section"
+  data-widerruf
+  data-widerruf-url="{{ submit_url }}"
+  data-success-message="{{ success_message|e('html_attr') }}"
+  data-error-missing-altcha="{{ widerruf_texts.altcha_missing|e('html_attr') }}"
+  data-error-submit="{{ widerruf_texts.submit_error|e('html_attr') }}"
+  data-success-fallback="{{ widerruf_texts.submit_success|e('html_attr') }}"
+>
+  <script async defer src="{{ asset('altcha/dist/altcha.js', 'markocupic_contao_altcha_antispam') }}" type="module"></script>
+
+  <article class="card">
+    {% if headline_text is not empty %}
+      <{{ headline_tag }}>{{ headline_text }}</{{ headline_tag }}>
+    {% else %}
+      <h2>{{ widerruf_texts.headline_default }}</h2>
+    {% endif %}
+
+    <form data-widerruf-form>
+      <input type="hidden" name="order_uuid" value="{{ prefill_uuid }}">
+
+      <p>
+        <label for="rv-name">{{ widerruf_texts.consumer_name }}</label>
+        <input id="rv-name" name="consumer_name" required>
+      </p>
+
+      <p>
+        <label for="rv-contract">{{ widerruf_texts.contract_reference }}</label>
+        <input id="rv-contract" name="contract_reference" required>
+      </p>
+
+      <p>
+        <label for="rv-email">{{ widerruf_texts.confirmation_email }}</label>
+        <input id="rv-email" name="confirmation_email" type="email" required>
+      </p>
+
+      <p>
+        <altcha-widget
+          name="altcha"
+          challengeurl="{{ altcha_challenge_url|default('/_contao_altcha_challenge') }}"
+          auto="onsubmit"
+          hidefooter
+        ></altcha-widget>
+      </p>
+
+      <p><button class="btn" type="submit">{{ widerruf_texts.submit }}</button></p>
+      <p class="inline-note" data-widerruf-message></p>
+    </form>
+  </article>
+</section>

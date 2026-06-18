@@ -1,0 +1,3 @@
+widerruf_bundle:
+  resource: ../src/Controller/
+  type: attribute

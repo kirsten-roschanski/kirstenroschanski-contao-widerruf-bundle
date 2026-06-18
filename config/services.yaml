@@ -1,0 +1,13 @@
+services:
+  _defaults:
+      public: false
+      autowire: true
+      autoconfigure: true
+
+  Kirstenroschanski\ContaoWiderrufBundle\:
+    resource: ../src/
+    exclude:
+      - ../src/ContaoManager/
+
+  Kirstenroschanski\ContaoWiderrufBundle\Content\WiderrufBackendCallbacks:
+    public: true
