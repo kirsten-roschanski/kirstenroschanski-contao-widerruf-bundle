@@ -15,6 +15,8 @@
         return;
       }
 
+      var altchaEnabled = block.getAttribute('data-altcha-enabled') !== '0';
+
       function getAltchaPayload() {
         var altchaField = form.querySelector('[name="altcha"]');
 
@@ -46,11 +48,18 @@
 
         isSubmitting = true;
 
-        verifyAltchaIfPossible()
+        Promise.resolve()
           .then(function () {
-            var altchaPayload = getAltchaPayload();
+            if (!altchaEnabled) {
+              return null;
+            }
 
-            if (!altchaPayload) {
+            return verifyAltchaIfPossible();
+          })
+          .then(function () {
+            var altchaPayload = altchaEnabled ? getAltchaPayload() : '';
+
+            if (altchaEnabled && !altchaPayload) {
               if (message) {
                 message.textContent = block.getAttribute('data-error-missing-altcha') || 'Bitte Anti-Spam-Prüfung abschließen.';
               }
@@ -59,6 +68,7 @@
             }
 
             var payload = {
+              cte_id: (form.querySelector('[name="cte_id"]') || {}).value || '0',
               order_uuid: (form.querySelector('[name="order_uuid"]') || {}).value || '',
               consumer_name: (form.querySelector('[name="consumer_name"]') || {}).value || '',
               contract_reference: (form.querySelector('[name="contract_reference"]') || {}).value || '',

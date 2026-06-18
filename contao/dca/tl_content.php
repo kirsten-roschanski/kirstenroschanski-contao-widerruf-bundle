@@ -2,7 +2,14 @@
 
 declare(strict_types=1);
 
-$GLOBALS['TL_DCA']['tl_content']['palettes']['widerruf'] = '{type_legend},type,headline,title;{widerruf_legend},widerruf_notification_form_submit,widerruf_success_message;{protected_legend:hide},protected;{invisible_legend:hide},invisible,start,stop';
+$GLOBALS['TL_DCA']['tl_content']['palettes']['widerruf'] = '{type_legend},type,headline,title;{widerruf_legend},widerruf_enable_altcha,widerruf_notification_form_submit,widerruf_success_message;{protected_legend:hide},protected;{invisible_legend:hide},invisible,start,stop';
+
+$GLOBALS['TL_DCA']['tl_content']['fields']['widerruf_enable_altcha'] = [
+    'exclude' => false,
+    'inputType' => 'checkbox',
+    'eval' => ['tl_class' => 'w50 m12'],
+    'sql' => "char(1) NOT NULL default '1'",
+];
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['widerruf_notification_form_submit'] = [
     'exclude' => false,

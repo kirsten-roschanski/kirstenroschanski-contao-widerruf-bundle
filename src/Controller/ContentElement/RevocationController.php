@@ -43,6 +43,8 @@ class RevocationController extends AbstractContentElementController
         $this->setTemplateValue($template, 'submit_url', $submitUrl);
         $this->setTemplateValue($template, 'altcha_challenge_url', $altchaChallengeUrl);
         $this->setTemplateValue($template, 'prefill_uuid', $uuid);
+        $this->setTemplateValue($template, 'widerruf_content_id', (int) ($model->id ?? 0));
+        $this->setTemplateValue($template, 'altcha_enabled', '1' === (string) ($model->widerruf_enable_altcha ?? '1'));
         $this->setTemplateValue($template, 'widerruf_locale', $isGerman ? 'de' : 'en');
         $texts = $this->getTexts();
         $this->setTemplateValue($template, 'widerruf_texts', $texts);

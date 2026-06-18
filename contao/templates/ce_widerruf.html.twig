@@ -12,12 +12,15 @@
   class="checkout-wrap section"
   data-widerruf
   data-widerruf-url="{{ submit_url }}"
+  data-altcha-enabled="{{ altcha_enabled ? '1' : '0' }}"
   data-success-message="{{ success_message|e('html_attr') }}"
   data-error-missing-altcha="{{ widerruf_texts.altcha_missing|e('html_attr') }}"
   data-error-submit="{{ widerruf_texts.submit_error|e('html_attr') }}"
   data-success-fallback="{{ widerruf_texts.submit_success|e('html_attr') }}"
 >
-  <script async defer src="{{ asset('altcha/dist/altcha.js', 'markocupic_contao_altcha_antispam') }}" type="module"></script>
+  {% if altcha_enabled %}
+    <script async defer src="{{ asset('altcha/dist/altcha.js', 'markocupic_contao_altcha_antispam') }}" type="module"></script>
+  {% endif %}
 
   <article class="card">
     {% if headline_text is not empty %}
@@ -27,6 +30,7 @@
     {% endif %}
 
     <form data-widerruf-form>
+      <input type="hidden" name="cte_id" value="{{ widerruf_content_id|default(0) }}">
       <input type="hidden" name="order_uuid" value="{{ prefill_uuid }}">
 
       <div class="widget widget-text mandatory">
@@ -50,14 +54,16 @@
         <input type="text" name="confirmation_email" id="rv-email" class="text mandatory" value="" required="">
       </div>
 
-      <div class="widget widget-altcha mandatory">
-        <altcha-widget
-          name="altcha"
-          challengeurl="{{ altcha_challenge_url|default('/_contao_altcha_challenge') }}"
-          auto="onsubmit"
-          hidefooter
-        ></altcha-widget>
-      </div>
+      {% if altcha_enabled %}
+        <div class="widget widget-altcha mandatory">
+          <altcha-widget
+            name="altcha"
+            challengeurl="{{ altcha_challenge_url|default('/_contao_altcha_challenge') }}"
+            auto="onsubmit"
+            hidefooter
+          ></altcha-widget>
+        </div>
+      {% endif %}
 
       <div class="widget widget-submit">
         <button type="submit" class="submit">{{ widerruf_texts.submit }}</button>

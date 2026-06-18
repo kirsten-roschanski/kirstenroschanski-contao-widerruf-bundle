@@ -22,17 +22,22 @@ $submitUrl = (string) ($this->submit_url ?? '/_widerruf');
 $altchaChallengeUrl = (string) ($this->altcha_challenge_url ?? '/_contao_altcha_challenge');
 $successMessage = (string) ($this->success_message ?? '');
 $prefillUuid = (string) ($this->prefill_uuid ?? '');
+$contentId = (int) ($this->widerruf_content_id ?? 0);
+$altchaEnabled = (bool) ($this->altcha_enabled ?? true);
 ?>
 <section
     class="checkout-wrap section"
     data-widerruf
     data-widerruf-url="<?= htmlspecialchars($submitUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+    data-altcha-enabled="<?= $altchaEnabled ? '1' : '0' ?>"
     data-success-message="<?= htmlspecialchars($successMessage, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
     data-error-missing-altcha="<?= htmlspecialchars((string) ($texts['altcha_missing'] ?? 'Bitte Anti-Spam-Pruefung abschliessen.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
     data-error-submit="<?= htmlspecialchars((string) ($texts['submit_error'] ?? 'Widerruf konnte nicht uebermittelt werden.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
     data-success-fallback="<?= htmlspecialchars((string) ($texts['submit_success'] ?? 'Widerruf erfolgreich uebermittelt.'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
 >
-    <script async defer src="/bundles/markocupiccontaoaltchaantispam/altcha/dist/altcha.js" type="module"></script>
+    <?php if ($altchaEnabled): ?>
+        <script async defer src="/bundles/markocupiccontaoaltchaantispam/altcha/dist/altcha.js" type="module"></script>
+    <?php endif; ?>
 
     <article class="card">
         <?php if ('' !== trim($headlineText)): ?>
@@ -42,6 +47,7 @@ $prefillUuid = (string) ($this->prefill_uuid ?? '');
         <?php endif; ?>
 
         <form data-widerruf-form>
+            <input type="hidden" name="cte_id" value="<?= $contentId ?>">
             <input type="hidden" name="order_uuid" value="<?= htmlspecialchars($prefillUuid, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
 
             <div class="widget widget-text mandatory">
@@ -65,14 +71,16 @@ $prefillUuid = (string) ($this->prefill_uuid ?? '');
                 <input type="text" name="confirmation_email" id="rv-email" class="text mandatory" value="" required="">
             </div>
 
-            <div class="widget widget-altcha mandatory">
-                <altcha-widget
-                    name="altcha"
-                    challengeurl="<?= htmlspecialchars($altchaChallengeUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
-                    auto="onsubmit"
-                    hidefooter
-                ></altcha-widget>
-            </div>
+            <?php if ($altchaEnabled): ?>
+                <div class="widget widget-altcha mandatory">
+                    <altcha-widget
+                        name="altcha"
+                        challengeurl="<?= htmlspecialchars($altchaChallengeUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
+                        auto="onsubmit"
+                        hidefooter
+                    ></altcha-widget>
+                </div>
+            <?php endif; ?>
 
             <div class="widget widget-submit">
                 <button type="submit" class="submit"><?= htmlspecialchars((string) ($texts['submit'] ?? 'Widerruf absenden'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></button>
