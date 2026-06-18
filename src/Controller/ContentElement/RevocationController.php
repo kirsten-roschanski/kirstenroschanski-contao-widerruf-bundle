@@ -7,7 +7,6 @@ namespace Kirstenroschanski\ContaoWiderrufBundle\Controller\ContentElement;
 use Contao\ContentModel;
 use Contao\CoreBundle\Controller\ContentElement\AbstractContentElementController;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsContentElement;
-use Contao\CoreBundle\Twig\FragmentTemplate;
 use Markocupic\ContaoAltchaAntispam\Controller\AltchaController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +19,7 @@ class RevocationController extends AbstractContentElementController
     {
     }
 
-    protected function getResponse(FragmentTemplate $template, ContentModel $model, Request $request): Response
+    protected function getResponse($template, ContentModel $model, Request $request): Response
     {
         $uuid = trim((string) $request->query->get('uuid', ''));
         $locale = strtolower((string) $request->getLocale());
@@ -41,16 +40,35 @@ class RevocationController extends AbstractContentElementController
             // Fallback for stale route cache.
         }
 
-        $template->set('submit_url', $submitUrl);
-        $template->set('altcha_challenge_url', $altchaChallengeUrl);
-        $template->set('prefill_uuid', $uuid);
-        $template->set('widerruf_locale', $isGerman ? 'de' : 'en');
-        $template->set('widerruf_texts', $this->getTexts($isGerman));
-        $template->set('success_message', (string) ($model->mgm_revocation_success_message ?: ($isGerman
+        $this->setTemplateValue($template, 'submit_url', $submitUrl);
+        $this->setTemplateValue($template, 'altcha_challenge_url', $altchaChallengeUrl);
+        $this->setTemplateValue($template, 'prefill_uuid', $uuid);
+        $this->setTemplateValue($template, 'widerruf_locale', $isGerman ? 'de' : 'en');
+        $this->setTemplateValue($template, 'widerruf_texts', $this->getTexts($isGerman));
+        $this->setTemplateValue($template, 'success_message', (string) ($model->mgm_revocation_success_message ?: ($isGerman
             ? 'Vielen Dank. Dein Widerruf wurde übermittelt. Eine Bestätigung wurde per E-Mail gesendet.'
             : 'Thank you. Your revocation has been submitted. A confirmation has been sent by email.')));
 
-        return $template->getResponse();
+        if (\is_object($template) && method_exists($template, 'getResponse')) {
+            return $template->getResponse();
+        }
+
+        if (\is_object($template) && method_exists($template, 'parse')) {
+            return new Response((string) $template->parse());
+        }
+
+        return new Response('');
+    }
+
+    private function setTemplateValue(object $template, string $key, mixed $value): void
+    {
+        if (method_exists($template, 'set')) {
+            $template->set($key, $value);
+
+            return;
+        }
+
+        $template->{$key} = $value;
     }
 
     private function getTexts(bool $isGerman): array
