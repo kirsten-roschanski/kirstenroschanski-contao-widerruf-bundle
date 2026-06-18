@@ -76,12 +76,18 @@
               altcha: altchaPayload,
             };
 
+            var body = new URLSearchParams();
+
+            Object.keys(payload).forEach(function (key) {
+              body.append(key, String(payload[key] || ''));
+            });
+
             return fetch(block.getAttribute('data-widerruf-url'), {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
               },
-              body: JSON.stringify(payload),
+              body: body.toString(),
             });
           })
           .then(function (response) {

@@ -29,7 +29,7 @@
       <h2>{{ widerruf_texts.headline_default }}</h2>
     {% endif %}
 
-    <form data-widerruf-form>
+    <form data-widerruf-form method="post" action="{{ submit_url }}">
       <input type="hidden" name="cte_id" value="{{ widerruf_content_id|default(0) }}">
       <input type="hidden" name="order_uuid" value="{{ prefill_uuid }}">
 

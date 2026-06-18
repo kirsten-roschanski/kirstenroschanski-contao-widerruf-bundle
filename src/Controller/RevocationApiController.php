@@ -24,7 +24,7 @@ class RevocationApiController
     public function __invoke(Request $request): JsonResponse
     {
         try {
-            $payload = json_decode((string) $request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
+            $payload = $this->extractPayload($request);
 
             $cteId = (int) ($payload['cte_id'] ?? 0);
             $altchaRequired = $this->isAltchaEnabledForCte($cteId);
@@ -55,6 +55,32 @@ class RevocationApiController
                 'message' => $exception->getMessage(),
             ], 400);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function extractPayload(Request $request): array
+    {
+        $payload = $request->request->all();
+
+        if ([] !== $payload) {
+            return $payload;
+        }
+
+        $raw = trim((string) $request->getContent());
+
+        if ('' === $raw) {
+            return [];
+        }
+
+        $decoded = json_decode($raw, true, 512, \JSON_THROW_ON_ERROR);
+
+        if (!\is_array($decoded)) {
+            throw new \InvalidArgumentException('Ungültige Anfrage: Erwartete Formulardaten oder JSON-Objekt.');
+        }
+
+        return $decoded;
     }
 
     private function isAltchaEnabledForCte(int $cteId): bool

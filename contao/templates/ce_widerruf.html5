@@ -46,7 +46,7 @@ $altchaEnabled = (bool) ($this->altcha_enabled ?? true);
             <h2><?= htmlspecialchars((string) ($texts['headline_default'] ?? 'Widerrufsformular'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h2>
         <?php endif; ?>
 
-        <form data-widerruf-form>
+        <form data-widerruf-form method="post" action="<?= htmlspecialchars($submitUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
             <input type="hidden" name="cte_id" value="<?= $contentId ?>">
             <input type="hidden" name="order_uuid" value="<?= htmlspecialchars($prefillUuid, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
 
