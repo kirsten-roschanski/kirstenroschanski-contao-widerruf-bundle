@@ -11,7 +11,7 @@ $GLOBALS['BE_MOD']['content']['widerrufe'] = [
 $GLOBALS['TL_MODELS']['tl_widerruf'] = RevocationModel::class;
 
 // Notification Center (1.x compatible) custom notification types.
-$GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf_form_submit'] = [
+$GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf']['widerruf_form_submit'] = [
     'email_subject' => [
         'revocation_id',
         'consumer_name',
@@ -48,7 +48,7 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf_form_submit'] = [
     ],
 ];
 
-$GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf_status_change'] = [
+$GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf']['widerruf_status_change'] = [
     'email_subject' => [
         'revocation_id',
         'status',
