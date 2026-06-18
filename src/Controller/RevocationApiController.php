@@ -24,7 +24,13 @@ class RevocationApiController
         try {
             $payload = json_decode((string) $request->getContent(), true, 512, \JSON_THROW_ON_ERROR);
 
-            $altchaPayload = (string) (($payload['altcha'] ?? ''));
+            $altchaRaw = $payload['altcha'] ?? '';
+            $altchaPayload = \is_array($altchaRaw)
+                ? (string) ($altchaRaw['payload'] ?? '')
+                : (string) $altchaRaw;
+
+            $altchaPayload = trim($altchaPayload);
+
             if ('' === $altchaPayload || !$this->altchaValidator->validate($altchaPayload)) {
                 throw new \InvalidArgumentException('Anti-Spam-Prüfung fehlgeschlagen. Bitte erneut versuchen.');
             }

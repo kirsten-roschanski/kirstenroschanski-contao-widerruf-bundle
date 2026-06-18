@@ -9,37 +9,71 @@
     document.querySelectorAll('[data-widerruf]').forEach(function (block) {
       var form = block.querySelector('[data-widerruf-form]');
       var message = block.querySelector('[data-widerruf-message]');
+      var isSubmitting = false;
 
       if (!form) {
         return;
       }
 
+      function getAltchaPayload() {
+        var altchaField = form.querySelector('[name="altcha"]');
+
+        if (!altchaField || typeof altchaField.value !== 'string') {
+          return '';
+        }
+
+        return altchaField.value.trim();
+      }
+
+      function verifyAltchaIfPossible() {
+        var altchaField = form.querySelector('[name="altcha"]');
+
+        if (!altchaField || typeof altchaField.verify !== 'function') {
+          return Promise.resolve();
+        }
+
+        return Promise.resolve(altchaField.verify()).catch(function () {
+          return null;
+        });
+      }
+
       form.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        var payload = {
-          order_uuid: (form.querySelector('[name="order_uuid"]') || {}).value || '',
-          consumer_name: (form.querySelector('[name="consumer_name"]') || {}).value || '',
-          contract_reference: (form.querySelector('[name="contract_reference"]') || {}).value || '',
-          confirmation_email: (form.querySelector('[name="confirmation_email"]') || {}).value || '',
-          altcha: (form.querySelector('[name="altcha"]') || {}).value || '',
-        };
-
-        if (!payload.altcha) {
-          if (message) {
-            message.textContent = block.getAttribute('data-error-missing-altcha') || 'Bitte Anti-Spam-Prüfung abschließen.';
-          }
-
+        if (isSubmitting) {
           return;
         }
 
-        fetch(block.getAttribute('data-widerruf-url'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
+        isSubmitting = true;
+
+        verifyAltchaIfPossible()
+          .then(function () {
+            var altchaPayload = getAltchaPayload();
+
+            if (!altchaPayload) {
+              if (message) {
+                message.textContent = block.getAttribute('data-error-missing-altcha') || 'Bitte Anti-Spam-Prüfung abschließen.';
+              }
+
+              throw new Error('__ALTCHA_MISSING__');
+            }
+
+            var payload = {
+              order_uuid: (form.querySelector('[name="order_uuid"]') || {}).value || '',
+              consumer_name: (form.querySelector('[name="consumer_name"]') || {}).value || '',
+              contract_reference: (form.querySelector('[name="contract_reference"]') || {}).value || '',
+              confirmation_email: (form.querySelector('[name="confirmation_email"]') || {}).value || '',
+              altcha: altchaPayload,
+            };
+
+            return fetch(block.getAttribute('data-widerruf-url'), {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload),
+            });
+          })
           .then(function (response) {
             return response.json();
           })
@@ -55,9 +89,16 @@
             form.reset();
           })
           .catch(function (error) {
+            if (error && error.message === '__ALTCHA_MISSING__') {
+              return;
+            }
+
             if (message) {
               message.textContent = error.message;
             }
+          })
+          .finally(function () {
+            isSubmitting = false;
           });
       });
     });
