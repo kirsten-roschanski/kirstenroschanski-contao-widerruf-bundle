@@ -29,31 +29,40 @@
     <form data-widerruf-form>
       <input type="hidden" name="order_uuid" value="{{ prefill_uuid }}">
 
-      <p>
-        <label for="rv-name">{{ widerruf_texts.consumer_name }}</label>
-        <input id="rv-name" name="consumer_name" required>
-      </p>
+      <div class="widget widget-text mandatory">
+        <label for="rv-name" class="mandatory">
+            <span class="invisible">{{ widerruf_texts.required_field }} </span>{{ widerruf_texts.consumer_name }}<span class="mandatory">*</span>
+        </label>
+        <input type="text" name="consumer_name" id="rv-name" class="text mandatory" value="" required="">
+      </div>
 
-      <p>
-        <label for="rv-contract">{{ widerruf_texts.contract_reference }}</label>
-        <input id="rv-contract" name="contract_reference" required>
-      </p>
+      <div class="widget widget-text mandatory">
+        <label for="rv-contract" class="mandatory">
+            <span class="invisible">{{ widerruf_texts.required_field }} </span>{{ widerruf_texts.contract_reference }}<span class="mandatory">*</span>
+        </label>
+        <input type="text" name="contract_reference" id="rv-contract" class="text mandatory" value="" required="">
+      </div>
 
-      <p>
-        <label for="rv-email">{{ widerruf_texts.confirmation_email }}</label>
-        <input id="rv-email" name="confirmation_email" type="email" required>
-      </p>
+      <div class="widget widget-text mandatory">
+        <label for="rv-email" class="mandatory">
+            <span class="invisible">{{ widerruf_texts.required_field }} </span>{{ widerruf_texts.confirmation_email }}<span class="mandatory">*</span>
+        </label>
+        <input type="text" name="confirmation_email" id="rv-email" class="text mandatory" value="" required="">
+      </div>
 
-      <p>
+      <div class="widget widget-altcha mandatory">
         <altcha-widget
           name="altcha"
           challengeurl="{{ altcha_challenge_url|default('/_contao_altcha_challenge') }}"
           auto="onsubmit"
           hidefooter
         ></altcha-widget>
-      </p>
+      </div>
 
-      <p><button class="btn" type="submit">{{ widerruf_texts.submit }}</button></p>
+      <div class="widget widget-submit">
+        <button type="submit" class="submit">{{ widerruf_texts.submit }}</button>
+      </div>  
+
       <p class="inline-note" data-widerruf-message></p>
     </form>
   </article>

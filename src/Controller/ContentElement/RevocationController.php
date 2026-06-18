@@ -44,15 +44,14 @@ class RevocationController extends AbstractContentElementController
         $this->setTemplateValue($template, 'altcha_challenge_url', $altchaChallengeUrl);
         $this->setTemplateValue($template, 'prefill_uuid', $uuid);
         $this->setTemplateValue($template, 'widerruf_locale', $isGerman ? 'de' : 'en');
-        $this->setTemplateValue($template, 'widerruf_texts', $this->getTexts($isGerman));
+        $texts = $this->getTexts();
+        $this->setTemplateValue($template, 'widerruf_texts', $texts);
         $modelData = $model->row();
         $configuredSuccessMessage = (string) (($modelData['widerruf_success_message'] ?? '') ?: ($modelData['mgm_revocation_success_message'] ?? ''));
 
         $this->setTemplateValue($template, 'success_message', '' !== $configuredSuccessMessage
             ? $configuredSuccessMessage
-            : ($isGerman
-            ? 'Vielen Dank. Dein Widerruf wurde übermittelt. Eine Bestätigung wurde per E-Mail gesendet.'
-            : 'Thank you. Your revocation has been submitted. A confirmation has been sent by email.'));
+            : (string) ($texts['success_default'] ?? ''));
 
         if (\is_object($template) && method_exists($template, 'getResponse')) {
             return $template->getResponse();
@@ -76,30 +75,14 @@ class RevocationController extends AbstractContentElementController
         $template->{$key} = $value;
     }
 
-    private function getTexts(bool $isGerman): array
+    private function getTexts(): array
     {
-        if ($isGerman) {
-            return [
-                'headline_default' => 'Widerrufsformular',
-                'consumer_name' => 'Name des Verbrauchers',
-                'contract_reference' => 'Vertragsangaben (Datum/Bestellnummer/Rechnungsnummer)',
-                'confirmation_email' => 'E-Mail-Adresse für die Bestätigung',
-                'submit' => 'Widerruf absenden',
-                'altcha_missing' => 'Bitte Anti-Spam-Prüfung abschließen.',
-                'submit_error' => 'Widerruf konnte nicht übermittelt werden.',
-                'submit_success' => 'Widerruf erfolgreich übermittelt.',
-            ];
+        $texts = $GLOBALS['TL_LANG']['MGM_WIDERRUF'] ?? [];
+
+        if (!\is_array($texts)) {
+            return [];
         }
 
-        return [
-            'headline_default' => 'Revocation Form',
-            'consumer_name' => 'Consumer name',
-            'contract_reference' => 'Contract details (date/order number/invoice number)',
-            'confirmation_email' => 'Email address for confirmation',
-            'submit' => 'Submit revocation',
-            'altcha_missing' => 'Please complete the anti-spam verification.',
-            'submit_error' => 'Revocation could not be submitted.',
-            'submit_success' => 'Revocation submitted successfully.',
-        ];
+        return $texts;
     }
 }
