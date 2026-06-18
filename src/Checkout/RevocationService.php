@@ -94,7 +94,12 @@ class RevocationService
             return;
         }
 
-        $from = (string) (Config::get('adminEmail') ?: 'noreply@localhost');
+        $from = $this->resolveSenderAddress();
+
+        if (null === $from) {
+            return;
+        }
+
         $scopeLabel = 'full' === $scopeType ? 'gesamte Bestellung' : 'Teilwiderruf';
         $itemsText = [] === $selectedItems ? '-' : implode("\n", $selectedItems);
         $detailsText = '' === $scopeDetails ? '-' : $scopeDetails;
@@ -123,7 +128,30 @@ class RevocationService
             ->subject('Bestätigung deines Widerrufs')
             ->text($body);
 
-        $this->mailer->send($email);
+        try {
+            $this->mailer->send($email);
+        } catch (\Throwable) {
+            // Do not fail the revocation submit if SMTP sender policy rejects the message.
+        }
+    }
+
+    private function resolveSenderAddress(): ?string
+    {
+        $sender = trim((string) Config::get('adminEmail'));
+
+        if ('' === $sender) {
+            return null;
+        }
+
+        if (!filter_var($sender, \FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        if (str_ends_with(strtolower($sender), '@localhost')) {
+            return null;
+        }
+
+        return $sender;
     }
 
     private function sendConfirmationViaNotificationCenter(

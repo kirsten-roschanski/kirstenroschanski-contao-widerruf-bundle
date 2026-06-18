@@ -167,7 +167,12 @@ class WiderrufBackendCallbacks
             return;
         }
 
-        $from = (string) (Config::get('adminEmail') ?: 'noreply@localhost');
+        $from = $this->resolveSenderAddress();
+
+        if (null === $from) {
+            return;
+        }
+
         $statusLabel = $this->getStatusLabel($status);
         $body = implode("\n", [
             'Hallo '.$name.',',
@@ -187,7 +192,30 @@ class WiderrufBackendCallbacks
             ->subject('Status deines Widerrufs: '.$statusLabel)
             ->text($body);
 
-        $this->mailer->send($email);
+        try {
+            $this->mailer->send($email);
+        } catch (\Throwable) {
+            // Do not break status processing if SMTP sender policy rejects the message.
+        }
+    }
+
+    private function resolveSenderAddress(): ?string
+    {
+        $sender = trim((string) Config::get('adminEmail'));
+
+        if ('' === $sender) {
+            return null;
+        }
+
+        if (!filter_var($sender, \FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        if (str_ends_with(strtolower($sender), '@localhost')) {
+            return null;
+        }
+
+        return $sender;
     }
 
     private function sendStatusNotificationViaNotificationCenter(
