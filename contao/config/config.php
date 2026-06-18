@@ -12,6 +12,25 @@ $GLOBALS['TL_MODELS']['tl_widerruf'] = RevocationModel::class;
 
 // Notification Center (1.x compatible) custom notification types.
 $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf']['widerruf_form_submit'] = [
+    'recipients' => [
+        'confirmation_email',
+    ],
+    'recipients_cc' => [
+        'confirmation_email',
+    ],
+    'recipients_bcc' => [
+        'confirmation_email',
+    ],
+    'sender_name' => [
+        'consumer_name',
+        'confirmation_email',
+    ],
+    'sender_address' => [
+        'confirmation_email',
+    ],
+    'reply_to' => [
+        'confirmation_email',
+    ],
     'email_sender_name' => [
         'consumer_name',
         'confirmation_email',
@@ -65,6 +84,25 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf']['widerruf_form_
 ];
 
 $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE']['widerruf']['widerruf_status_change'] = [
+    'recipients' => [
+        'confirmation_email',
+    ],
+    'recipients_cc' => [
+        'confirmation_email',
+    ],
+    'recipients_bcc' => [
+        'confirmation_email',
+    ],
+    'sender_name' => [
+        'consumer_name',
+        'confirmation_email',
+    ],
+    'sender_address' => [
+        'confirmation_email',
+    ],
+    'reply_to' => [
+        'confirmation_email',
+    ],
     'email_sender_name' => [
         'consumer_name',
         'confirmation_email',
