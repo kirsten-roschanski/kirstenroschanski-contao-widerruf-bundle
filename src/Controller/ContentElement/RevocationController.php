@@ -45,9 +45,14 @@ class RevocationController extends AbstractContentElementController
         $this->setTemplateValue($template, 'prefill_uuid', $uuid);
         $this->setTemplateValue($template, 'widerruf_locale', $isGerman ? 'de' : 'en');
         $this->setTemplateValue($template, 'widerruf_texts', $this->getTexts($isGerman));
-        $this->setTemplateValue($template, 'success_message', (string) ($model->mgm_revocation_success_message ?: ($isGerman
+        $modelData = $model->row();
+        $configuredSuccessMessage = (string) (($modelData['widerruf_success_message'] ?? '') ?: ($modelData['mgm_revocation_success_message'] ?? ''));
+
+        $this->setTemplateValue($template, 'success_message', '' !== $configuredSuccessMessage
+            ? $configuredSuccessMessage
+            : ($isGerman
             ? 'Vielen Dank. Dein Widerruf wurde übermittelt. Eine Bestätigung wurde per E-Mail gesendet.'
-            : 'Thank you. Your revocation has been submitted. A confirmation has been sent by email.')));
+            : 'Thank you. Your revocation has been submitted. A confirmation has been sent by email.'));
 
         if (\is_object($template) && method_exists($template, 'getResponse')) {
             return $template->getResponse();
