@@ -1,5 +1,8 @@
 {% set headline_text = '' %}
 {% set headline_tag = 'h2' %}
+{% set content_id = widerruf_content_id|default(0) %}
+{% set heading_id = 'widerruf-heading-' ~ content_id %}
+{% set message_id = 'widerruf-message-' ~ content_id %}
 
 {% if headline is iterable %}
   {% set headline_text = headline.text|default('') %}
@@ -10,6 +13,8 @@
 
 <section
   class="checkout-wrap section"
+  role="region"
+  aria-labelledby="{{ heading_id }}"
   data-widerruf
   data-widerruf-url="{{ submit_url }}"
   data-altcha-enabled="{{ altcha_enabled ? '1' : '0' }}"
@@ -26,34 +31,36 @@
 
   <article class="card">
     {% if headline_text is not empty %}
-      <{{ headline_tag }}>{{ headline_text }}</{{ headline_tag }}>
+      <{{ headline_tag }} id="{{ heading_id }}">{{ headline_text }}</{{ headline_tag }}>
     {% else %}
-      <h2>{{ widerruf_texts.headline_default }}</h2>
+      <h2 id="{{ heading_id }}">{{ widerruf_texts.headline_default }}</h2>
     {% endif %}
 
-    <form data-widerruf-form method="post" action="{{ submit_url }}">
-      <input type="hidden" name="cte_id" value="{{ widerruf_content_id|default(0) }}">
+    <p class="inline-note" id="{{ message_id }}" data-widerruf-message role="status" aria-live="polite" aria-atomic="true" tabindex="-1" hidden></p>
+
+    <form data-widerruf-form method="post" action="{{ submit_url }}" aria-describedby="{{ message_id }}">
+      <input type="hidden" name="cte_id" value="{{ content_id }}">
       <input type="hidden" name="order_uuid" value="{{ prefill_uuid }}">
 
       <div class="widget widget-text mandatory">
         <label for="rv-name" class="mandatory">
             <span class="invisible">{{ widerruf_texts.required_field }} </span>{{ widerruf_texts.consumer_name }}<span class="mandatory">*</span>
         </label>
-        <input type="text" name="consumer_name" id="rv-name" class="text mandatory" value="" required="">
+        <input type="text" name="consumer_name" id="rv-name" class="text mandatory" value="" autocomplete="name" required="" aria-required="true">
       </div>
 
       <div class="widget widget-text mandatory">
         <label for="rv-contract" class="mandatory">
             <span class="invisible">{{ widerruf_texts.required_field }} </span>{{ widerruf_texts.contract_reference }}<span class="mandatory">*</span>
         </label>
-        <input type="text" name="contract_reference" id="rv-contract" class="text mandatory" value="" required="">
+        <input type="text" name="contract_reference" id="rv-contract" class="text mandatory" value="" required="" aria-required="true">
       </div>
 
       <div class="widget widget-text mandatory">
         <label for="rv-email" class="mandatory">
             <span class="invisible">{{ widerruf_texts.required_field }} </span>{{ widerruf_texts.confirmation_email }}<span class="mandatory">*</span>
         </label>
-        <input type="text" name="confirmation_email" id="rv-email" class="text mandatory" value="" required="">
+        <input type="email" name="confirmation_email" id="rv-email" class="text mandatory" value="" autocomplete="email" inputmode="email" required="" aria-required="true">
       </div>
 
       {% if altcha_enabled %}
@@ -70,8 +77,6 @@
       <div class="widget widget-submit">
         <button type="submit" class="submit">{{ widerruf_texts.submit }}</button>
       </div>  
-
-      <p class="inline-note" data-widerruf-message></p>
     </form>
   </article>
 </section>

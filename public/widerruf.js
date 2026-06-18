@@ -17,6 +17,21 @@
 
       var altchaEnabled = block.getAttribute('data-altcha-enabled') !== '0';
 
+      function announceMessage(text, isError) {
+        if (!message) {
+          return;
+        }
+
+        message.hidden = false;
+        message.setAttribute('role', isError ? 'alert' : 'status');
+        message.setAttribute('aria-live', isError ? 'assertive' : 'polite');
+        message.textContent = text;
+
+        if (typeof message.focus === 'function') {
+          message.focus({ preventScroll: false });
+        }
+      }
+
       function getAltchaPayload() {
         var altchaField = form.querySelector('[name="altcha"]');
 
@@ -47,6 +62,14 @@
         }
 
         isSubmitting = true;
+        form.setAttribute('aria-busy', 'true');
+
+        if (message) {
+          message.textContent = '';
+          message.hidden = true;
+          message.setAttribute('role', 'status');
+          message.setAttribute('aria-live', 'polite');
+        }
 
         Promise.resolve()
           .then(function () {
@@ -60,9 +83,7 @@
             var altchaPayload = altchaEnabled ? getAltchaPayload() : '';
 
             if (altchaEnabled && !altchaPayload) {
-              if (message) {
-                message.textContent = block.getAttribute('data-error-missing-altcha') || 'Bitte Anti-Spam-Prüfung abschließen.';
-              }
+              announceMessage(block.getAttribute('data-error-missing-altcha') || 'Bitte Anti-Spam-Prüfung abschließen.', true);
 
               throw new Error('__ALTCHA_MISSING__');
             }
@@ -91,16 +112,38 @@
             });
           })
           .then(function (response) {
-            return response.json();
+            return response.text().then(function (text) {
+              var json = null;
+
+              if ('' !== text.trim()) {
+                try {
+                  json = JSON.parse(text);
+                } catch (parseError) {
+                  if (!response.ok) {
+                    throw new Error((block.getAttribute('data-error-submit') || 'Widerruf konnte nicht übermittelt werden.') + ' (HTTP ' + response.status + ')');
+                  }
+
+                  throw new Error('Unerwartete Serverantwort. Bitte Seite neu laden und erneut versuchen.');
+                }
+              }
+
+              if (!response.ok) {
+                throw new Error((json && json.message) || (block.getAttribute('data-error-submit') || 'Widerruf konnte nicht übermittelt werden.') + ' (HTTP ' + response.status + ')');
+              }
+
+              if (!json || 'object' !== typeof json) {
+                throw new Error('Unerwartete Serverantwort. Bitte Seite neu laden und erneut versuchen.');
+              }
+
+              return json;
+            });
           })
           .then(function (json) {
             if (!json.success) {
               throw new Error(json.message || block.getAttribute('data-error-submit') || 'Widerruf konnte nicht übermittelt werden.');
             }
 
-            if (message) {
-              message.textContent = block.getAttribute('data-success-message') || block.getAttribute('data-success-fallback') || 'Widerruf erfolgreich übermittelt.';
-            }
+            announceMessage(block.getAttribute('data-success-message') || block.getAttribute('data-success-fallback') || 'Widerruf erfolgreich übermittelt.', false);
 
             form.reset();
           })
@@ -109,12 +152,11 @@
               return;
             }
 
-            if (message) {
-              message.textContent = error.message;
-            }
+            announceMessage(error.message, true);
           })
           .finally(function () {
             isSubmitting = false;
+            form.setAttribute('aria-busy', 'false');
           });
       });
     });

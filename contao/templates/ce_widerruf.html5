@@ -24,9 +24,13 @@ $successMessage = (string) ($this->success_message ?? '');
 $prefillUuid = (string) ($this->prefill_uuid ?? '');
 $contentId = (int) ($this->widerruf_content_id ?? 0);
 $altchaEnabled = (bool) ($this->altcha_enabled ?? true);
+$headingId = 'widerruf-heading-'.$contentId;
+$messageId = 'widerruf-message-'.$contentId;
 ?>
 <section
     class="checkout-wrap section"
+    role="region"
+    aria-labelledby="<?= htmlspecialchars($headingId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
     data-widerruf
     data-widerruf-url="<?= htmlspecialchars($submitUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"
     data-altcha-enabled="<?= $altchaEnabled ? '1' : '0' ?>"
@@ -43,12 +47,14 @@ $altchaEnabled = (bool) ($this->altcha_enabled ?? true);
 
     <article class="card">
         <?php if ('' !== trim($headlineText)): ?>
-            <<?= $headlineTag ?>><?= htmlspecialchars($headlineText, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></<?= $headlineTag ?>>
+            <<?= $headlineTag ?> id="<?= htmlspecialchars($headingId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"><?= htmlspecialchars($headlineText, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></<?= $headlineTag ?>>
         <?php else: ?>
-            <h2><?= htmlspecialchars((string) ($texts['headline_default'] ?? 'Widerrufsformular'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h2>
+            <h2 id="<?= htmlspecialchars($headingId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"><?= htmlspecialchars((string) ($texts['headline_default'] ?? 'Widerrufsformular'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></h2>
         <?php endif; ?>
 
-        <form data-widerruf-form method="post" action="<?= htmlspecialchars($submitUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
+        <p class="inline-note" id="<?= htmlspecialchars($messageId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>" data-widerruf-message role="status" aria-live="polite" aria-atomic="true" tabindex="-1" hidden></p>
+
+        <form data-widerruf-form method="post" action="<?= htmlspecialchars($submitUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>" aria-describedby="<?= htmlspecialchars($messageId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
             <input type="hidden" name="cte_id" value="<?= $contentId ?>">
             <input type="hidden" name="order_uuid" value="<?= htmlspecialchars($prefillUuid, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>">
 
@@ -56,21 +62,21 @@ $altchaEnabled = (bool) ($this->altcha_enabled ?? true);
                 <label for="rv-name" class="mandatory">
                     <span class="invisible"><?= htmlspecialchars((string) ($texts['required_field'] ?? 'Pflichtfeld'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?> </span><?= htmlspecialchars((string) ($texts['consumer_name'] ?? 'Name des Verbrauchers'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?><span class="mandatory">*</span>
                 </label>
-                <input type="text" name="consumer_name" id="rv-name" class="text mandatory" value="" required="">
+                <input type="text" name="consumer_name" id="rv-name" class="text mandatory" value="" autocomplete="name" required="" aria-required="true">
             </div>
 
             <div class="widget widget-text mandatory">
                 <label for="rv-contract" class="mandatory">
                     <span class="invisible"><?= htmlspecialchars((string) ($texts['required_field'] ?? 'Pflichtfeld'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?> </span><?= htmlspecialchars((string) ($texts['contract_reference'] ?? 'Vertragsangaben'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?><span class="mandatory">*</span>
                 </label>
-                <input type="text" name="contract_reference" id="rv-contract" class="text mandatory" value="" required="">
+                <input type="text" name="contract_reference" id="rv-contract" class="text mandatory" value="" required="" aria-required="true">
             </div>
 
             <div class="widget widget-text mandatory">
                 <label for="rv-email" class="mandatory">
                     <span class="invisible"><?= htmlspecialchars((string) ($texts['required_field'] ?? 'Pflichtfeld'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?> </span><?= htmlspecialchars((string) ($texts['confirmation_email'] ?? 'E-Mail-Adresse fuer die Bestaetigung'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?><span class="mandatory">*</span>
                 </label>
-                <input type="text" name="confirmation_email" id="rv-email" class="text mandatory" value="" required="">
+                <input type="email" name="confirmation_email" id="rv-email" class="text mandatory" value="" autocomplete="email" inputmode="email" required="" aria-required="true">
             </div>
 
             <?php if ($altchaEnabled): ?>
@@ -87,8 +93,6 @@ $altchaEnabled = (bool) ($this->altcha_enabled ?? true);
             <div class="widget widget-submit">
                 <button type="submit" class="submit"><?= htmlspecialchars((string) ($texts['submit'] ?? 'Widerruf absenden'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?></button>
             </div>
-
-            <p class="inline-note" data-widerruf-message></p>
         </form>
     </article>
 </section>
