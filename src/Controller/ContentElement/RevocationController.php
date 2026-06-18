@@ -7,16 +7,20 @@ namespace Kirstenroschanski\ContaoWiderrufBundle\Controller\ContentElement;
 use Contao\ContentModel;
 use Contao\CoreBundle\Controller\ContentElement\AbstractContentElementController;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsContentElement;
+use Contao\CoreBundle\Twig\FragmentTemplate;
 use Markocupic\ContaoAltchaAntispam\Controller\AltchaController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Twig\Environment;
 
 #[AsContentElement('widerruf', category: 'includes')]
 class RevocationController extends AbstractContentElementController
 {
-    public function __construct(private readonly UrlGeneratorInterface $urlGenerator)
-    {
+    public function __construct(
+        private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly Environment $twig,
+    ) {
     }
 
     protected function getResponse($template, ContentModel $model, Request $request): Response
@@ -55,7 +59,15 @@ class RevocationController extends AbstractContentElementController
             ? $configuredSuccessMessage
             : (string) ($texts['success_default'] ?? ''));
 
-        return parent::getResponse($template, $model, $request);
+        if ($template instanceof FragmentTemplate) {
+            return $template->getResponse();
+        }
+
+        if (is_object($template) && method_exists($template, 'parse')) {
+            return new Response((string) $template->parse());
+        }
+
+        return new Response('');
     }
 
     private function setTemplateValue(object $template, string $key, mixed $value): void
