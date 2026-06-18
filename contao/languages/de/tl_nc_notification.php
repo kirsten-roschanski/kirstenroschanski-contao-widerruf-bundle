@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-$GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf'] = 'Widerruf';
+$GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf_form_submit'] = 'Widerruf: Formularübertragung';
+$GLOBALS['TL_LANG']['tl_nc_notification']['type']['widerruf_status_change'] = 'Widerruf: Statusänderung';
 
 $GLOBALS['TL_LANG']['nc_token']['revocation_id'] = 'Vorgangsnummer des Widerrufs';
 $GLOBALS['TL_LANG']['nc_token']['status'] = 'Technischer Status (new, processing, resolved, rejected)';

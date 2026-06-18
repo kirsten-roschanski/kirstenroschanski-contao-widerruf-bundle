@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$GLOBALS['TL_DCA']['tl_content']['palettes']['widerruf'] = '{type_legend},type,headline,title;{text_legend},text;{widerruf_legend},mgm_revocation_success_message;{protected_legend:hide},protected;{invisible_legend:hide},invisible,start,stop';
+$GLOBALS['TL_DCA']['tl_content']['palettes']['widerruf'] = '{type_legend},type,headline,title;{widerruf_legend},mgm_revocation_success_message;{protected_legend:hide},protected;{invisible_legend:hide},invisible,start,stop';
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['mgm_revocation_success_message'] = [
     'exclude' => true,
